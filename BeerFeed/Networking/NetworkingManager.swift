@@ -19,7 +19,7 @@ class NetworkingManager {
     private let session = Alamofire.Session()
     
     let itemsPerPageCount = 25
-    private let beerUrl = "https://api.punkapi.com/v2/beers.."
+    private let beerUrl = "https://api.punkapi.com/v2/beers"
     
     private func createPageParameters(page: Int) -> Dictionary<String, Any> {
         return [ParameterName.pageIndex.rawValue : page,

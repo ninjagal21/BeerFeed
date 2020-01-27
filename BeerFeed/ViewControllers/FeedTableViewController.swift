@@ -7,28 +7,23 @@
 //
 
 import UIKit
-import AlamofireImage
 
-class FeedTableViewController: UITableViewController, UITableViewDataSourcePrefetching {
-        
+class FeedTableViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedTableViewModelDelegate {
+    
     private let estimatedRowHeight: CGFloat = 100.0
     private let sectionNumber = 0
-    private let initialPageIndex = 1
     
-    private let networkingManager = NetworkingManager()
-    private var beerData = [Beer]()
-    
-    private var isLoading = false
+    private let viewModel = FeedTableViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
+        viewModel.feedTableVC = self
         
-        isLoading = true
-        loadPage(initialPageIndex)
+        viewModel.loadMoreBeer()
     }
     
-    func setupTableView() {
+    private func setupTableView() {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = estimatedRowHeight
         tableView.tableFooterView = UIView(frame: .zero)
@@ -41,7 +36,7 @@ class FeedTableViewController: UITableViewController, UITableViewDataSourcePrefe
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return beerData.count + 1
+        return viewModel.beerData.count + 1
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -50,12 +45,12 @@ class FeedTableViewController: UITableViewController, UITableViewDataSourcePrefe
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if indexPath.row >= beerData.count {
+        if indexPath.row >= viewModel.beerData.count {
             return tableView.dequeueReusableCell(withIdentifier: "loadingCellIdentifier", for: indexPath)
         }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath) as! FeedTableViewCell
-        let beer = beerData[indexPath.row]
+        let beer = viewModel.beerData[indexPath.row]
         cell.setup(imageUrl: URL(string: beer.imageUrl),
                    nameText: beer.name,
                    tagText: beer.tagline,
@@ -64,46 +59,31 @@ class FeedTableViewController: UITableViewController, UITableViewDataSourcePrefe
     }
 
     func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
-        if indexPaths.contains(IndexPath(row: beerData.count, section: sectionNumber)) {
-            let pageIndexToLoad = beerData.count / networkingManager.itemsPerPageCount + 1
-            loadPage(pageIndexToLoad)
+        let lastIndex = viewModel.beerData.count
+        if indexPaths.contains(IndexPath(row: lastIndex, section: sectionNumber)) {
+            viewModel.loadMoreBeer()
         }
     }
     
-    func loadPage(_ page: Int) {
-        networkingManager.loadData(page: page) { [weak self] (response) in
-            
-            guard let strongSelf = self else {return}
-            
-            switch response {
-            case let .success(result):
-                if page == strongSelf.initialPageIndex {
-                    strongSelf.beerData = result
-                    strongSelf.tableView.reloadData()
-                    strongSelf.isLoading = false
-                } else {
-                    let startIndex = strongSelf.beerData.count + 1
-                    strongSelf.beerData.append(contentsOf:result)
-                    let endIndex = strongSelf.beerData.count
-                    let indexPathArray = (startIndex..<endIndex).map { IndexPath(row: $0, section: strongSelf.sectionNumber)}
-                    strongSelf.tableView.insertRows(at: indexPathArray, with: .automatic)
-                }
-                break
-            case let .failure(error):
-                strongSelf.showAlert(error, currentPageLoading: page)
-                break
-            }
+    // MARK: - View Model Delegate
+    
+    func updateDataForIndexRange(_ range: Range<Int>?) {
+        if let range = range {
+            let indexPathArray = range.map { IndexPath(row: $0, section: sectionNumber)}
+            tableView.insertRows(at: indexPathArray, with: .automatic)
+        } else {
+            tableView.reloadData()
         }
     }
-
-    func showAlert(_ error: Error, currentPageLoading: Int) {
+    
+    func showAlertWithErrorText(_ errorText: String) {
         let alert = UIAlertController(title: "Error",
-                                      message: error.localizedDescription,
+                                      message: errorText,
                                       preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "Retry",
                                       style: UIAlertAction.Style.default,
                                       handler: {[weak self] action in
-                                        self?.loadPage(currentPageLoading)
+                                        self?.viewModel.loadMoreBeer()
         }))
         present(alert, animated: true, completion: nil)
     }
