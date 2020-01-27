@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AlamofireImage
 
 class FeedTableViewCell: UITableViewCell {
 
@@ -23,7 +24,11 @@ class FeedTableViewCell: UITableViewCell {
     
     func setup(imageUrl: URL?, nameText: String?, tagText: String?, descriptionText: String?) {
         if let url = imageUrl {
-            postImageView.af_setImage(withURL: url)
+            let filter = AspectScaledToFitSizeFilter(size: CGSize(width: postImageView.frame.width,
+                                                                  height: postImageView.frame.height))
+            postImageView?.af_setImage(withURL: url,
+                                       placeholderImage: UIImage(named: "placeholderImage"),
+                                       filter: filter)
         }
         nameLabel.text = nameText
         taglineLabel.text = tagText

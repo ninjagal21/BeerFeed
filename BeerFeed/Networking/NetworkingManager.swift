@@ -10,28 +10,27 @@ import Foundation
 import Alamofire
 
 class NetworkingManager {
-    let session = Alamofire.Session()
     
-    var pageNumber = 1
-    let itemsPerPage = 25
-    let beerUrl = "https://api.punkapi.com/v2/beers"
-    var parameters: [String: Any] {
-        return ["page" : pageNumber, "per_page" : itemsPerPage]
+    enum ParameterName: String {
+        case pageIndex = "page"
+        case perPageCount = "per_page"
     }
     
-    func loadData(for index: Int? = nil , callback: @escaping ([Beer]) -> Void) {
-        
-        if (index != nil) {pageNumber = index! / itemsPerPage}
-        
-        let request = session.request(beerUrl, parameters: parameters)
+    private let session = Alamofire.Session()
+    
+    let itemsPerPageCount = 25
+    private let beerUrl = "https://api.punkapi.com/v2/beers.."
+    
+    private func createPageParameters(page: Int) -> Dictionary<String, Any> {
+        return [ParameterName.pageIndex.rawValue : page,
+                ParameterName.perPageCount.rawValue : itemsPerPageCount]
+    }
+    
+    func loadData(page: Int, callback: @escaping (Result<[Beer], AFError>) -> Void) {
+        let request = session.request(beerUrl,
+                                      parameters: createPageParameters(page: page))
         request.responseDecodable(of: [Beer].self) { response in
-          switch response.result {
-          case let .success(result): //infinite scroll
-            callback(result)
-            break;
-          case let .failure(error): //paging
-            break;
-          }
+            callback(response.result)
         }
     }
 }
