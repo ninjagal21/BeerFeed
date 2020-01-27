@@ -171,7 +171,6 @@
 			packageReferences = (
 				3102AF1C23DE288C00FE9D91 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3102AF1F23DE29F500FE9D91 /* XCRemoteSwiftPackageReference "AlamofireImage" */,
-				3102AF3523DE536200FE9D91 /* XCRemoteSwiftPackageReference "SDWebImage" */,
 			);
 			productRefGroup = 3102AF0023DE26AA00FE9D91 /* Products */;
 			projectDirPath = "";
@@ -342,7 +341,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"BeerFeed/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = BeerFeed/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -361,7 +359,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"BeerFeed/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = BeerFeed/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -413,14 +410,6 @@
 			requirement = {
 				kind = exactVersion;
 				version = "4.0.0-beta.6";
-			};
-		};
-		3102AF3523DE536200FE9D91 /* XCRemoteSwiftPackageReference "SDWebImage" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SDWebImage/SDWebImage.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.5.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
